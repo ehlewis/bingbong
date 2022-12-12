@@ -3,10 +3,12 @@ from discord.ext import commands
 import time
 import asyncio
 import os
+from dotenv import load_dotenv
 
-DISCORD_TOKEN = "%DISCORD_TOKEN%"
-BOT_MEMBER_ID = ""
-bot = commands.Bot(command_prefix = "!")
+load_dotenv()
+DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
+BOT_MEMBER_ID = os.getenv('BOT_MEMBER_ID')
+bot = commands.Bot(intents=discord.Intents.default(), command_prefix = "!")
 
 @bot.event
 async def on_ready():
@@ -23,6 +25,9 @@ async def ping(ctx):
 
 @bot.event
 async def on_voice_state_update(member, before, after):
+    if str(member.id) == BOT_MEMBER_ID:
+        #Bot moving. Discard
+        return
     files = os.listdir(os.curdir+"/clips")
     users = []
     for file in files:
@@ -36,7 +41,7 @@ async def on_voice_state_update(member, before, after):
     voice_channel = after.channel
 
     # only play music if user is in a voice channel
-    if voice_channel != None and before.channel != after.channel and member.id != BOT_MEMBER_ID:
+    if voice_channel != None and before.channel != after.channel:
         # grab user's voice channel
         channel_name = voice_channel.name
         print(member.name + ' (' + str(member.id) + ') joined channel: '+ channel_name)
@@ -59,8 +64,6 @@ async def on_voice_state_update(member, before, after):
             print("RAN INTO AN ERROR: ")
             print(e)
         await vc.disconnect()
-    elif member.id == BOT_MEMBER_ID:
-        print("Its just the bot moving around")
     elif before.channel == after.channel:
         print(member.name + ' changed state.')
     else:

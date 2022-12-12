@@ -1,2 +1,5 @@
 discord
 asyncio
+PyNaCl
+ffmpeg
+python-dotenv
